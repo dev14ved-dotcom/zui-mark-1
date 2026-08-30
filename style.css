@@ -1,0 +1,803 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    min-height: 100vh;
+    background:
+        radial-gradient(circle at center, #101828 0%, #05070b 45%, #020305 100%);
+    color: white;
+    font-family: Arial, sans-serif;
+    overflow-x: hidden;
+}
+
+/* =========================
+   BACKGROUND PARTICLES
+========================= */
+
+.particles {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.35;
+
+    background-image:
+        radial-gradient(circle, white 1px, transparent 1px);
+
+    background-size: 45px 45px;
+
+    animation: moveParticles 15s linear infinite;
+}
+
+@keyframes moveParticles {
+    from {
+        transform: translateY(0);
+    }
+
+    to {
+        transform: translateY(-45px);
+    }
+}
+
+
+/* =========================
+   TOP BAR
+========================= */
+
+.top-bar {
+    height: 70px;
+    padding: 0 35px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    border-bottom: 1px solid rgba(255,255,255,0.12);
+
+    background: rgba(5,7,12,0.7);
+
+    backdrop-filter: blur(15px);
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    font-size: 24px;
+    font-weight: bold;
+
+    letter-spacing: 5px;
+}
+
+.logo-dots {
+    font-size: 15px;
+    letter-spacing: 2px;
+}
+
+.mark {
+    font-size: 12px;
+    letter-spacing: 4px;
+    opacity: 0.5;
+}
+
+.status {
+    font-size: 12px;
+    letter-spacing: 2px;
+}
+
+.status-dot {
+    display: inline-block;
+
+    width: 8px;
+    height: 8px;
+
+    margin-right: 7px;
+
+    border-radius: 50%;
+
+    background: #5cff8d;
+
+    box-shadow:
+        0 0 8px #5cff8d,
+        0 0 18px rgba(92,255,141,0.5);
+
+    animation: statusPulse 2s infinite;
+}
+
+@keyframes statusPulse {
+
+    0%, 100% {
+        opacity: 0.5;
+    }
+
+    50% {
+        opacity: 1;
+    }
+
+}
+
+
+/* =========================
+   MAIN CONTAINER
+========================= */
+
+.main-container {
+    width: min(1000px, 92%);
+
+    margin: auto;
+
+    padding: 45px 0;
+}
+
+
+/* =========================
+   ZUI CORE
+========================= */
+
+.core-section {
+    text-align: center;
+}
+
+.zui-core {
+
+    width: 210px;
+    height: 210px;
+
+    margin: auto;
+
+    position: relative;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    filter:
+        drop-shadow(
+            0 0 15px
+            rgba(255,255,255,0.15)
+        );
+}
+
+
+/* CORE RINGS */
+
+.core-ring {
+
+    position: absolute;
+
+    border:
+        1px solid
+        rgba(255,255,255,0.35);
+
+    border-radius: 50%;
+}
+
+
+/* Inner ring */
+
+.ring-1 {
+
+    width: 150px;
+    height: 150px;
+
+    border-color:
+        rgba(255,255,255,0.45);
+
+    animation:
+        rotate 8s linear infinite;
+}
+
+
+/* Middle ring */
+
+.ring-2 {
+
+    width: 180px;
+    height: 180px;
+
+    border-style: dashed;
+
+    opacity: 0.7;
+
+    animation:
+        rotateReverse 12s linear infinite;
+}
+
+
+/* Outer ring */
+
+.ring-3 {
+
+    width: 205px;
+    height: 205px;
+
+    opacity: 0.35;
+
+    animation:
+        rotate 18s linear infinite;
+}
+
+
+/* ZUI dots */
+
+.core-dots {
+
+    line-height: 30px;
+
+    letter-spacing: 7px;
+
+    font-size: 18px;
+
+    z-index: 2;
+
+    animation:
+        corePulse
+        2.5s
+        ease-in-out
+        infinite;
+
+    text-shadow:
+
+        0 0 5px white,
+
+        0 0 15px
+        rgba(255,255,255,0.5);
+}
+
+
+/* Core pulse */
+
+@keyframes corePulse {
+
+    0%, 100% {
+
+        transform: scale(1);
+
+        opacity: 0.75;
+    }
+
+    50% {
+
+        transform: scale(1.15);
+
+        opacity: 1;
+    }
+
+}
+
+
+/* Ring rotation */
+
+@keyframes rotate {
+
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+
+}
+
+
+@keyframes rotateReverse {
+
+    from {
+        transform: rotate(360deg);
+    }
+
+    to {
+        transform: rotate(0deg);
+    }
+
+}
+
+
+/* ZUI title */
+
+.core-section h1 {
+
+    margin-top: 10px;
+
+    font-size: 42px;
+
+    letter-spacing: 12px;
+
+    text-shadow:
+        0 0 15px
+        rgba(255,255,255,0.25);
+}
+
+
+/* System status */
+
+.system-status {
+
+    margin-top: 8px;
+
+    font-size: 11px;
+
+    letter-spacing: 4px;
+
+    opacity: 0.55;
+}
+
+
+/* Greeting */
+
+.greeting {
+
+    margin-top: 15px;
+
+    opacity: 0.7;
+}
+
+
+/* =========================
+   CHAT CONTAINER
+========================= */
+
+.chat-container {
+
+    margin-top: 40px;
+
+    border:
+        1px solid
+        rgba(255,255,255,0.12);
+
+    border-radius: 18px;
+
+    background:
+        rgba(10,13,20,0.7);
+
+    backdrop-filter:
+        blur(18px);
+
+    overflow: hidden;
+
+    box-shadow:
+        0 0 40px
+        rgba(0,0,0,0.3);
+}
+
+
+/* Chat header */
+
+.chat-header {
+
+    padding: 15px 20px;
+
+    display: flex;
+
+    justify-content: space-between;
+
+    font-size: 11px;
+
+    letter-spacing: 3px;
+
+    border-bottom:
+        1px solid
+        rgba(255,255,255,0.1);
+}
+
+
+/* Secure connection */
+
+.connection {
+
+    opacity: 0.6;
+}
+
+
+/* Chat box */
+
+.chat-box {
+
+    min-height: 230px;
+
+    max-height: 400px;
+
+    padding: 25px;
+
+    overflow-y: auto;
+}
+
+
+/* Messages */
+
+.message {
+
+    margin-bottom: 18px;
+
+    animation:
+        messageAppear
+        0.3s
+        ease;
+}
+
+
+@keyframes messageAppear {
+
+    from {
+
+        opacity: 0;
+
+        transform:
+            translateY(10px);
+    }
+
+    to {
+
+        opacity: 1;
+
+        transform:
+            translateY(0);
+    }
+
+}
+
+
+/* Sender */
+
+.sender {
+
+    font-size: 11px;
+
+    letter-spacing: 3px;
+
+    opacity: 0.5;
+}
+
+
+/* Message text */
+
+.message p {
+
+    margin-top: 6px;
+
+    line-height: 1.5;
+}
+
+
+/* =========================
+   INPUT AREA
+========================= */
+
+.input-section {
+
+    margin-top: 18px;
+
+    display: flex;
+
+    gap: 10px;
+}
+
+
+/* Text box */
+
+.input-section input {
+
+    flex: 1;
+
+    padding: 16px 18px;
+
+    border-radius: 12px;
+
+    border:
+        1px solid
+        rgba(255,255,255,0.15);
+
+    background:
+        rgba(10,13,20,0.8);
+
+    color: white;
+
+    outline: none;
+
+    font-size: 15px;
+
+    transition: 0.2s;
+}
+
+
+.input-section input:focus {
+
+    border-color:
+        rgba(255,255,255,0.5);
+
+    box-shadow:
+        0 0 15px
+        rgba(255,255,255,0.05);
+}
+
+
+.input-section input::placeholder {
+
+    color:
+        rgba(255,255,255,0.35);
+}
+
+
+/* Buttons */
+
+.voice-button,
+.send-button {
+
+    border:
+        1px solid
+        rgba(255,255,255,0.15);
+
+    border-radius: 12px;
+
+    background:
+        rgba(255,255,255,0.08);
+
+    color: white;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+}
+
+
+/* Voice */
+
+.voice-button {
+
+    width: 55px;
+
+    font-size: 18px;
+}
+
+
+/* Send */
+
+.send-button {
+
+    padding: 0 25px;
+
+    letter-spacing: 2px;
+}
+
+
+/* Hover */
+
+.voice-button:hover,
+.send-button:hover {
+
+    background:
+        rgba(255,255,255,0.18);
+
+    transform:
+        translateY(-2px);
+
+    box-shadow:
+        0 0 15px
+        rgba(255,255,255,0.08);
+}
+
+
+/* Click */
+
+.voice-button:active,
+.send-button:active {
+
+    transform:
+        translateY(0);
+}
+
+
+/* =========================
+   CONTROL BUTTONS
+========================= */
+
+.controls {
+
+    display: flex;
+
+    justify-content: center;
+
+    gap: 15px;
+
+    margin-top: 25px;
+}
+
+
+.controls button {
+
+    min-width: 130px;
+
+    padding: 13px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 6px;
+
+    align-items: center;
+
+    border:
+        1px solid
+        rgba(255,255,255,0.1);
+
+    border-radius: 12px;
+
+    background:
+        rgba(255,255,255,0.04);
+
+    color: white;
+
+    cursor: pointer;
+
+    transition: 0.25s;
+}
+
+
+.controls button:hover {
+
+    background:
+        rgba(255,255,255,0.12);
+
+    transform:
+        translateY(-3px);
+
+    box-shadow:
+        0 0 20px
+        rgba(255,255,255,0.05);
+}
+
+
+.controls span {
+
+    font-size: 9px;
+
+    letter-spacing: 2px;
+
+    opacity: 0.6;
+}
+
+
+/* =========================
+   SYSTEM PANEL
+========================= */
+
+.system-panel {
+
+    display: flex;
+
+    justify-content: center;
+
+    gap: 60px;
+
+    margin-top: 30px;
+
+    font-size: 10px;
+
+    letter-spacing: 2px;
+
+    opacity: 0.5;
+}
+
+
+.system-panel div {
+
+    display: flex;
+
+    gap: 8px;
+}
+
+
+.system-panel strong {
+
+    opacity: 1;
+}
+
+
+/* =========================
+   SCROLLBAR
+========================= */
+
+.chat-box::-webkit-scrollbar {
+
+    width: 5px;
+}
+
+
+.chat-box::-webkit-scrollbar-track {
+
+    background:
+        rgba(255,255,255,0.03);
+}
+
+
+.chat-box::-webkit-scrollbar-thumb {
+
+    background:
+        rgba(255,255,255,0.2);
+
+    border-radius: 10px;
+}
+
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 650px) {
+
+    .top-bar {
+
+        padding: 0 15px;
+    }
+
+
+    .mark {
+
+        display: none;
+    }
+
+
+    .main-container {
+
+        width: 94%;
+
+        padding-top: 30px;
+    }
+
+
+    .core-section h1 {
+
+        font-size: 34px;
+    }
+
+
+    .controls {
+
+        flex-wrap: wrap;
+    }
+
+
+    .system-panel {
+
+        gap: 15px;
+
+        flex-wrap: wrap;
+    }
+
+
+    .input-section {
+
+        flex-wrap: wrap;
+    }
+
+
+    .input-section input {
+
+        width: 100%;
+
+        flex-basis: 100%;
+    }
+
+
+    .send-button {
+
+        flex: 1;
+
+        padding: 15px;
+    }
+
+
+    .voice-button {
+
+        width: 55px;
+
+        height: 50px;
+    }
+
+}
