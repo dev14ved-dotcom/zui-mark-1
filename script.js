@@ -1,11 +1,7 @@
 const input = document.querySelector(".input-section input");
 const button = document.querySelector(".send-button");
 const chatBox = document.querySelector(".chat-box");
-const chatEndpoint =
-    window.location.hostname === "localhost" ||
-    window.location.hostname === "127.0.0.1"
-        ? "http://localhost:3000/chat"
-        : "https://zui-mark-1.onrender.com/chat";
+const chatEndpoint = "https://zui-mark-1.onrender.com/chat";
 
 async function sendMessage() {
 

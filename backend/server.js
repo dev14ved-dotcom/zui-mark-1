@@ -58,7 +58,15 @@ function saveMemories(data) {
 // EXPRESS
 // ==========================================
 
-app.use(cors());
+app.use(cors({
+    origin: [
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "http://localhost",
+        "https://dev14ved-dotcom.github.io"
+    ],
+    credentials: true
+}));
 app.use(express.json());
 
 // ==========================================
