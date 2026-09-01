@@ -14,8 +14,8 @@ const PORT = process.env.PORT || 3000;
 // ZUI CONFIGURATION
 // ==========================================
 
-const MUSE_API_URL = "https://api.openai.com/v1/chat/completions";
-const MUSE_MODEL = "gpt-4o-mini";
+const MUSE_API_URL = "https://api.meta.ai/v1/chat/completions";
+const MUSE_MODEL = "muse-spark-1.2";
 
 const SERP_API_URL = "https://serpapi.com/search.json";
 
