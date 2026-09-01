@@ -2,12 +2,26 @@ require("dotenv").config();
 
 const express = require("express");
 const cors = require("cors");
+const axios = require("axios");
 const fs = require("fs");
 const path = require("path");
-const axios = require("axios");
 
 const app = express();
+
 const PORT = process.env.PORT || 3000;
+
+// ==========================================
+// ZUI CONFIGURATION
+// ==========================================
+
+const MUSE_API_URL = "https://api.openai.com/v1/chat/completions";
+const MUSE_MODEL = "gpt-4o-mini";
+
+const SERP_API_URL = "https://serpapi.com/search.json";
+
+// ==========================================
+// MEMORY
+// ==========================================
 
 const memoryFile = path.join(__dirname, "memory.json");
 
@@ -18,16 +32,14 @@ function loadMemories() {
         }
 
         const data = fs.readFileSync(memoryFile, "utf8");
-        const parsed = JSON.parse(data);
 
-        if (!Array.isArray(parsed.memories)) {
-            parsed.memories = [];
-        }
-
-        return parsed;
+        return JSON.parse(data);
     } catch (error) {
         console.error("MEMORY LOAD ERROR:", error.message);
-        return { memories: [] };
+
+        return {
+            memories: []
+        };
     }
 }
 
@@ -42,178 +54,409 @@ function saveMemories(data) {
     }
 }
 
-async function searchWeb(query) {
-    const response = await axios.get(
-        "https://serpapi.com/search.json",
-        {
-            params: {
-                engine: "google",
-                q: query,
-                api_key: process.env.SERPAPI_KEY
-            }
-        }
-    );
-
-    return response.data;
-}
+// ==========================================
+// EXPRESS
+// ==========================================
 
 app.use(cors());
 app.use(express.json());
 
-app.use(express.static(path.join(__dirname, "..")));
+// ==========================================
+// HOME
+// ==========================================
 
 app.get("/", (req, res) => {
-    res.sendFile(
-        path.join(__dirname, "..", "index.html")
-    );
+    res.send("ZUI MARK 1 is online!");
 });
 
-app.post("/chat", async (req, res) => {
-    try {
-        const message = req.body.message;
+// ==========================================
+// DETECT IF WEB SEARCH IS NEEDED
+// ==========================================
 
-        if (!message || typeof message !== "string") {
+function needsWebSearch(message) {
+
+    const text = message.toLowerCase();
+
+    const searchWords = [
+        "search",
+        "search for",
+        "google",
+        "latest",
+        "news",
+        "today",
+        "current",
+        "recent",
+        "right now",
+        "this week",
+        "this month",
+        "price",
+        "weather",
+        "score",
+        "stock",
+        "update",
+        "updates",
+        "who is",
+        "what happened",
+        "look up"
+    ];
+
+    return searchWords.some(word => text.includes(word));
+}
+
+// ==========================================
+// SERPAPI SEARCH
+// ==========================================
+
+async function searchWeb(query) {
+
+    if (!process.env.SERPAPI_KEY) {
+        throw new Error("SERPAPI_KEY is missing.");
+    }
+
+    const response = await axios.get(SERP_API_URL, {
+        params: {
+            engine: "google",
+            q: query,
+            api_key: process.env.SERPAPI_KEY
+        }
+    });
+
+    return response.data;
+}
+
+// ==========================================
+// FORMAT SEARCH RESULTS
+// ==========================================
+
+function formatSearchResults(data) {
+
+    let results = "";
+
+    if (data.organic_results) {
+
+        data.organic_results
+            .slice(0, 8)
+            .forEach((result, index) => {
+
+                results += `
+${index + 1}.
+Title: ${result.title || "No title"}
+Source: ${result.source || "Unknown"}
+Snippet: ${result.snippet || "No snippet"}
+Link: ${result.link || "No link"}
+`;
+            });
+    }
+
+    if (data.answer_box) {
+
+        results += `
+
+DIRECT ANSWER:
+${JSON.stringify(data.answer_box, null, 2)}
+`;
+    }
+
+    if (!results) {
+        results = "No useful search results were found.";
+    }
+
+    return results;
+}
+
+// ==========================================
+// MUSE SPARK
+// ==========================================
+
+async function askMuse(message, memory, searchResults = null) {
+
+    if (!process.env.MODEL_API_KEY) {
+        throw new Error("MODEL_API_KEY is missing.");
+    }
+
+    let systemPrompt = `
+You are ZUI MARK 1, a helpful AI assistant.
+
+Your personality:
+- Intelligent
+- Clear
+- Friendly
+- Direct
+- Helpful
+
+You have a persistent memory system.
+
+Use the memories below when they are relevant:
+
+${memory}
+
+Important:
+- Do not claim you searched the web unless search results were actually provided.
+- If web results are provided, use them as information sources.
+- Do not invent facts that are not supported by the available information.
+- Give the user a clear answer.
+`;
+
+    if (searchResults) {
+
+        systemPrompt += `
+
+WEB SEARCH RESULTS:
+
+${searchResults}
+
+Use these search results to answer the user's question.
+
+If the results are incomplete or conflicting, say so rather than inventing information.
+`;
+    }
+
+    const response = await axios.post(
+        MUSE_API_URL,
+        {
+            model: MUSE_MODEL,
+
+            messages: [
+                {
+                    role: "system",
+                    content: systemPrompt
+                },
+                {
+                    role: "user",
+                    content: message
+                }
+            ],
+
+            temperature: 0.7
+        },
+        {
+            headers: {
+                "Authorization":
+                    `Bearer ${process.env.MODEL_API_KEY}`,
+
+                "Content-Type":
+                    "application/json"
+            },
+
+            timeout: 120000
+        }
+    );
+
+    const result = response.data;
+
+    if (
+        result &&
+        result.choices &&
+        result.choices[0] &&
+        result.choices[0].message
+    ) {
+        return result.choices[0].message.content;
+    }
+
+    throw new Error(
+        "Muse returned an unexpected response."
+    );
+}
+
+// ==========================================
+// CHAT
+// ==========================================
+
+app.post("/chat", async (req, res) => {
+
+    try {
+
+        const message =
+            typeof req.body.message === "string"
+                ? req.body.message.trim()
+                : "";
+
+        if (!message) {
+
             return res.json({
                 reply: "Yes, Boss?"
             });
         }
 
-        const lowerMessage = message.trim().toLowerCase();
-        const memoryData = loadMemories();
+        const lowerMessage =
+            message.toLowerCase();
 
+        const memoryData =
+            loadMemories();
+
+        // ======================================
         // REMEMBER
+        // ======================================
+
         if (lowerMessage.startsWith("remember that ")) {
-            const memory = message
-                .trim()
-                .substring("remember that ".length)
-                .trim();
+
+            const memory =
+                message
+                    .substring(14)
+                    .trim();
 
             if (memory) {
-                const alreadyExists = memoryData.memories.some(
-                    item =>
-                        item.toLowerCase() === memory.toLowerCase()
-                );
 
-                if (alreadyExists) {
+                // Prevent exact duplicates
+                const alreadyExists =
+                    memoryData.memories.some(
+                        item =>
+                            item.toLowerCase() ===
+                            memory.toLowerCase()
+                    );
+
+                if (!alreadyExists) {
+
+                    memoryData.memories.push(memory);
+
+                    saveMemories(memoryData);
+
                     return res.json({
-                        reply: "I already remember that, Boss."
+                        reply:
+                            "Got it. I've saved that in my memory."
                     });
                 }
 
-                memoryData.memories.push(memory);
-                saveMemories(memoryData);
-
                 return res.json({
-                    reply: "Got it, Boss. I've saved that in my memory."
+                    reply:
+                        "I already have that in my memory."
                 });
             }
         }
 
+        // ======================================
         // SHOW MEMORY
+        // ======================================
+
         if (
             lowerMessage === "what do you remember?" ||
             lowerMessage === "show my memories"
         ) {
-            if (memoryData.memories.length === 0) {
+
+            if (
+                memoryData.memories.length === 0
+            ) {
+
                 return res.json({
-                    reply: "My memory is currently empty, Boss."
+                    reply:
+                        "My memory is currently empty."
                 });
             }
 
-            const memoryList = memoryData.memories
-                .map((item, index) => `${index + 1}. ${item}`)
-                .join("\n");
+            const memoryList =
+                memoryData.memories
+                    .map(
+                        (item, index) =>
+                            `${index + 1}. ${item}`
+                    )
+                    .join("\n");
 
             return res.json({
-                reply: "Here's what I remember, Boss:\n\n" + memoryList
+                reply:
+                    "Here's what I remember:\n\n" +
+                    memoryList
             });
         }
 
-        // CLEAR MEMORY
-        if (
-            lowerMessage === "forget everything" ||
-            lowerMessage === "clear my memories"
-        ) {
-            memoryData.memories = [];
-            saveMemories(memoryData);
+        // ======================================
+        // MEMORY CONTEXT
+        // ======================================
 
-            return res.json({
-                reply: "Done, Boss. I've cleared my memories."
-            });
-        }
+        const memoryText =
+            memoryData.memories.length > 0
+                ? memoryData.memories
+                    .map(
+                        (item, index) =>
+                            `${index + 1}. ${item}`
+                    )
+                    .join("\n")
+                : "No stored memories.";
 
-        // SEARCH
-        if (
-            lowerMessage.startsWith("search ") ||
-            lowerMessage.startsWith("search for ")
-        ) {
-            const query = message
-                .replace(/^search\s+for\s+/i, "")
-                .replace(/^search\s+/i, "")
-                .trim();
+        // ======================================
+        // WEB SEARCH
+        // ======================================
 
-            if (!query) {
-                return res.json({
-                    reply: "What should I search for, Boss?"
-                });
-            }
+        let searchResults = null;
+
+        if (needsWebSearch(message)) {
+
+            console.log(
+                "ZUI: Searching web with SerpApi..."
+            );
 
             try {
-                const results = await searchWeb(query);
 
-                if (
-                    !results.organic_results ||
-                    results.organic_results.length === 0
-                ) {
-                    return res.json({
-                        reply: "I couldn't find any results, Boss."
-                    });
-                }
+                const searchData =
+                    await searchWeb(message);
 
-                const answer = results.organic_results
-                    .slice(0, 5)
-                    .map((result, index) => {
-                        return (
-                            `${index + 1}. ${result.title}\n` +
-                            `${result.snippet || ""}`
-                        );
-                    })
-                    .join("\n\n");
+                searchResults =
+                    formatSearchResults(
+                        searchData
+                    );
 
-                return res.json({
-                    reply: answer
-                });
-
-            } catch (error) {
-                console.error(
-                    "SERPAPI ERROR:",
-                    error.response?.data || error.message
+                console.log(
+                    "ZUI: SerpApi search complete."
                 );
 
-                return res.status(500).json({
-                    reply: "I couldn't access the web right now, Boss."
-                });
+            } catch (searchError) {
+
+                console.error(
+                    "SERPAPI ERROR:",
+                    searchError.message
+                );
+
+                // Don't completely kill ZUI
+                // if search fails.
+                searchResults = null;
             }
         }
 
-        // TEMPORARY RESPONSE
-        return res.json({
-            reply:
-                "My AI brain isn't connected yet, Boss. " +
-                "Try saying: search Minecraft"
+        // ======================================
+        // ASK MUSE
+        // ======================================
+
+        console.log(
+            "ZUI: Asking Muse Spark..."
+        );
+
+        const answer =
+            await askMuse(
+                message,
+                memoryText,
+                searchResults
+            );
+
+        console.log(
+            "ZUI: Muse response received."
+        );
+
+        res.json({
+            reply: answer
         });
 
     } catch (error) {
-        console.error("ZUI SERVER ERROR:", error);
 
-        return res.status(500).json({
-            reply: "ZUI encountered a server error, Boss."
+        console.error(
+            "ZUI ERROR:",
+            error.response?.data ||
+            error.message
+        );
+
+        res.status(500).json({
+            reply:
+                "ZUI encountered an error while thinking."
         });
     }
 });
 
+// ==========================================
+// START SERVER
+// ==========================================
+
 app.listen(PORT, () => {
+
     console.log(
-        `ZUI backend running on http://localhost:${PORT}`
+        `ZUI backend running on port ${PORT}`
     );
+
 });
