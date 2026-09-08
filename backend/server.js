@@ -16,7 +16,7 @@ const PORT = process.env.PORT || 3000;
 
 const SERP_API_URL = "https://serpapi.com/search.json";
 const GNEWS_API_URL = "https://gnews.io/api/v4/search";
-const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-2.5-flash";
+const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-3.6-flash";
 const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
 
 // ==========================================
