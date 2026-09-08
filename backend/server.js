@@ -232,47 +232,60 @@ async function askGoogle(message, memory, searchResults = null) {
         "Do not claim to have searched the web unless search results are provided."
     ].filter(Boolean).join("\n\n");
 
-    try {
-        const response = await axios.post(
-            GEMINI_API_URL,
-            {
-                contents: [{
-                    parts: [{
-                        text: `${context}\n\nUser question: ${message}`
-                    }]
-                }],
-                generationConfig: {
-                    temperature: 0.7
-                }
-            },
-            {
-                headers: {
-                    "Content-Type": "application/json",
-                    "x-goog-api-key": apiKey
-                },
-                // Gemini 3.x can take longer than 30 seconds for a response.
-                timeout: 120000
-            }
-        );
-
-        const answer = response.data?.candidates?.[0]?.content?.parts
-            ?.map(part => part.text)
-            .filter(Boolean)
-            .join("\n");
-
-        if (!answer) {
-            throw new Error("Gemini returned no text response.");
+    const requestBody = {
+        contents: [{
+            parts: [{
+                text: `${context}\n\nUser question: ${message}`
+            }]
+        }],
+        generationConfig: {
+            temperature: 0.7
         }
+    };
 
-        return answer;
-    } catch (error) {
-        console.error(
-            "GOOGLE API ERROR:",
-            error.response?.data?.error?.message || error.message
-        );
-        throw new Error(
-            error.response?.data?.error?.message || error.message
-        );
+    const requestConfig = {
+        headers: {
+            "Content-Type": "application/json",
+            "x-goog-api-key": apiKey
+        },
+        // Gemini 3.x can take longer than 30 seconds for a response.
+        timeout: 120000
+    };
+
+    for (let attempt = 1; attempt <= 3; attempt++) {
+        try {
+            const response = await axios.post(
+            GEMINI_API_URL,
+                requestBody,
+                requestConfig
+            );
+
+            const answer = response.data?.candidates?.[0]?.content?.parts
+                ?.map(part => part.text)
+                .filter(Boolean)
+                .join("\n");
+
+            if (!answer) {
+                throw new Error("Gemini returned no text response.");
+            }
+
+            return answer;
+        } catch (error) {
+            const errorMessage = error.response?.data?.error?.message || error.message;
+            const retryable = error.response?.status === 429 ||
+                error.response?.status === 503 ||
+                /high demand|unavailable|overloaded/i.test(errorMessage);
+
+            console.error("GOOGLE API ERROR:", errorMessage);
+
+            if (!retryable || attempt === 3) {
+                throw new Error(errorMessage);
+            }
+
+            const retryDelay = attempt * 2000;
+            console.log(`ZUI: Gemini is busy; retrying in ${retryDelay / 1000} seconds...`);
+            await new Promise(resolve => setTimeout(resolve, retryDelay));
+        }
     }
 }
 
