@@ -15,6 +15,7 @@ const PORT = process.env.PORT || 3000;
 // ==========================================
 
 const SERP_API_URL = "https://serpapi.com/search.json";
+const GNEWS_API_URL = "https://gnews.io/api/v4/search";
 
 // ==========================================
 // MEMORY
@@ -129,6 +130,25 @@ async function searchWeb(query) {
     return response.data;
 }
 
+async function searchNews(query) {
+
+    if (!process.env.GNEWS_API_KEY) {
+        throw new Error("GNEWS_API_KEY is missing.");
+    }
+
+    const response = await axios.get(GNEWS_API_URL, {
+        params: {
+            q: query,
+            lang: "en",
+            max: 8,
+            sortby: "publishedAt",
+            apikey: process.env.GNEWS_API_KEY
+        }
+    });
+
+    return response.data;
+}
+
 // ==========================================
 // FORMAT SEARCH RESULTS
 // ==========================================
@@ -169,6 +189,24 @@ ${JSON.stringify(data.answer_box, null, 2)}
     return results;
 }
 
+function formatNewsResults(data) {
+
+    if (!data.articles || data.articles.length === 0) {
+        return "No useful news results were found.";
+    }
+
+    return data.articles
+        .slice(0, 8)
+        .map((article, index) => `
+${index + 1}.
+Title: ${article.title || "No title"}
+Source: ${article.source?.name || "Unknown"}
+Published: ${article.publishedAt || "Unknown"}
+Snippet: ${article.description || "No snippet"}
+Link: ${article.url || "No link"}`)
+        .join("\n");
+}
+
 // ==========================================
 // LOCAL RESPONSE
 // ==========================================
@@ -183,6 +221,10 @@ function createLocalReply(message, memory, searchResults = null) {
 
     if (/^(hi|hello|hey|good morning|good afternoon|good evening)\b/.test(lowerMessage)) {
         return "Hello, Boss. How can I help?";
+    }
+
+    if (lowerMessage.includes("what is alloying") || lowerMessage === "define alloying") {
+        return "Alloying is the process of combining a metal with one or more other elements to improve its properties. For example, steel is an alloy of iron and carbon. Alloying can increase strength, hardness, corrosion resistance, or durability.";
     }
 
     if (lowerMessage.includes("what do you know about me") && memory !== "No stored memories.") {
@@ -315,33 +357,42 @@ app.post("/chat", async (req, res) => {
         if (needsWebSearch(message)) {
 
             console.log(
-                "ZUI: Searching web with SerpApi..."
+                "ZUI: Searching for current information..."
             );
 
             try {
 
-                const searchData =
-                    await searchWeb(message);
+                const isNewsQuery =
+                    /\b(news|latest|headlines|breaking|current events)\b/i.test(message);
+
+                const searchData = isNewsQuery
+                    ? await searchNews(message)
+                    : await searchWeb(message);
 
                 searchResults =
-                    formatSearchResults(
-                        searchData
-                    );
+                    isNewsQuery
+                        ? formatNewsResults(searchData)
+                        : formatSearchResults(searchData);
 
                 console.log(
-                    "ZUI: SerpApi search complete."
+                    `ZUI: ${isNewsQuery ? "GNews" : "SerpApi"} search complete.`
                 );
 
             } catch (searchError) {
 
                 console.error(
-                    "SERPAPI ERROR:",
+                    "SEARCH PROVIDER ERROR:",
                     searchError.message
                 );
 
-                // Don't completely kill ZUI
-                // if search fails.
-                searchResults = null;
+                if (isNewsQuery && process.env.SERPAPI_KEY) {
+                    try {
+                        const fallbackData = await searchWeb(message);
+                        searchResults = formatSearchResults(fallbackData);
+                    } catch (fallbackError) {
+                        console.error("SEARCH FALLBACK ERROR:", fallbackError.message);
+                    }
+                }
             }
         }
 
