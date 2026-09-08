@@ -227,6 +227,7 @@ async function askGoogle(message, memory, searchResults = null) {
 
     const context = [
         "You are ZUI MARK 1, a clear, friendly, direct assistant.",
+        "Give concise but complete answers. Lead with the answer, use short paragraphs or bullets when helpful, and avoid repetition. Unless the user asks for depth, keep replies under 150 words.",
         `Stored memories:\n${memory}`,
         searchResults ? `Web search results:\n${searchResults}` : "",
         "Do not claim to have searched the web unless search results are provided."
@@ -239,7 +240,8 @@ async function askGoogle(message, memory, searchResults = null) {
             }]
         }],
         generationConfig: {
-            temperature: 0.7
+            temperature: 0.7,
+            maxOutputTokens: 400
         }
     };
 
