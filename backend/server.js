@@ -250,7 +250,8 @@ async function askGoogle(message, memory, searchResults = null) {
                     "Content-Type": "application/json",
                     "x-goog-api-key": apiKey
                 },
-                timeout: 30000
+                // Gemini 3.x can take longer than 30 seconds for a response.
+                timeout: 120000
             }
         );
 
