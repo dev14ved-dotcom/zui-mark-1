@@ -3,6 +3,15 @@ const button = document.querySelector(".send-button");
 const chatBox = document.querySelector(".chat-box");
 const chatEndpoint = "https://zui-mark-1.onrender.com/chat";
 
+function formatChatText(text) {
+    return String(text)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+        .replace(/\n/g, "<br>");
+}
+
 function createLocalReply(message) {
 
     const lowerMessage = message.toLowerCase();
@@ -51,7 +60,7 @@ async function sendMessage() {
     chatBox.innerHTML += `
         <div class="message user-message">
             <span class="sender">YOU</span>
-            <p>${message}</p>
+            <p>${formatChatText(message)}</p>
         </div>
     `;
 
@@ -96,7 +105,7 @@ async function sendMessage() {
 
         thinking.innerHTML = `
             <span class="sender">ZUI</span>
-            <p>${data.reply}</p>
+            <p>${formatChatText(data.reply)}</p>
         `;
 
     } catch (error) {
@@ -105,7 +114,7 @@ async function sendMessage() {
 
         thinking.innerHTML = `
             <span class="sender">ZUI</span>
-            <p>${createLocalReply(message)}</p>
+            <p>${formatChatText(createLocalReply(message))}</p>
         `;
     }
 
