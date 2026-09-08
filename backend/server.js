@@ -14,9 +14,6 @@ const PORT = process.env.PORT || 3000;
 // ZUI CONFIGURATION
 // ==========================================
 
-const MUSE_API_URL = "https://api.meta.ai/v1/chat/completions";
-const MUSE_MODEL = "muse-spark-1.2";
-
 const SERP_API_URL = "https://serpapi.com/search.json";
 
 // ==========================================
@@ -173,97 +170,26 @@ ${JSON.stringify(data.answer_box, null, 2)}
 }
 
 // ==========================================
-// MUSE SPARK
+// LOCAL RESPONSE
 // ==========================================
 
-async function askMuse(message, memory, searchResults = null) {
+function createLocalReply(message, memory, searchResults = null) {
 
-    if (!process.env.MODEL_API_KEY) {
-        throw new Error("MODEL_API_KEY is missing.");
-    }
-
-    let systemPrompt = `
-You are ZUI MARK 1, a helpful AI assistant.
-
-Your personality:
-- Intelligent
-- Clear
-- Friendly
-- Direct
-- Helpful
-
-You have a persistent memory system.
-
-Use the memories below when they are relevant:
-
-${memory}
-
-Important:
-- Do not claim you searched the web unless search results were actually provided.
-- If web results are provided, use them as information sources.
-- Do not invent facts that are not supported by the available information.
-- Give the user a clear answer.
-`;
+    const lowerMessage = message.toLowerCase();
 
     if (searchResults) {
-
-        systemPrompt += `
-
-WEB SEARCH RESULTS:
-
-${searchResults}
-
-Use these search results to answer the user's question.
-
-If the results are incomplete or conflicting, say so rather than inventing information.
-`;
+        return `I found these results for you:\n\n${searchResults}`;
     }
 
-    const response = await axios.post(
-        MUSE_API_URL,
-        {
-            model: MUSE_MODEL,
-
-            messages: [
-                {
-                    role: "system",
-                    content: systemPrompt
-                },
-                {
-                    role: "user",
-                    content: message
-                }
-            ],
-
-            temperature: 0.7
-        },
-        {
-            headers: {
-                "Authorization":
-                    `Bearer ${process.env.MODEL_API_KEY}`,
-
-                "Content-Type":
-                    "application/json"
-            },
-
-            timeout: 120000
-        }
-    );
-
-    const result = response.data;
-
-    if (
-        result &&
-        result.choices &&
-        result.choices[0] &&
-        result.choices[0].message
-    ) {
-        return result.choices[0].message.content;
+    if (/^(hi|hello|hey|good morning|good afternoon|good evening)\b/.test(lowerMessage)) {
+        return "Hello, Boss. How can I help?";
     }
 
-    throw new Error(
-        "Muse returned an unexpected response."
-    );
+    if (lowerMessage.includes("what do you know about me") && memory !== "No stored memories.") {
+        return `Here is what I remember about you:\n\n${memory}`;
+    }
+
+    return "I am running in local mode without a model API. I can save and show memories, and I can search the web when you ask for current information.";
 }
 
 // ==========================================
@@ -420,22 +346,22 @@ app.post("/chat", async (req, res) => {
         }
 
         // ======================================
-        // ASK MUSE
+        // LOCAL RESPONSE
         // ======================================
 
         console.log(
-            "ZUI: Asking Muse Spark..."
+            "ZUI: Creating local response..."
         );
 
         const answer =
-            await askMuse(
+            createLocalReply(
                 message,
                 memoryText,
                 searchResults
             );
 
         console.log(
-            "ZUI: Muse response received."
+            "ZUI: Local response ready."
         );
 
         res.json({

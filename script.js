@@ -3,6 +3,42 @@ const button = document.querySelector(".send-button");
 const chatBox = document.querySelector(".chat-box");
 const chatEndpoint = "https://zui-mark-1.onrender.com/chat";
 
+function createLocalReply(message) {
+
+    const lowerMessage = message.toLowerCase();
+    const memories = JSON.parse(
+        localStorage.getItem("zui-memories") || "[]"
+    );
+
+    if (lowerMessage.startsWith("remember that ")) {
+
+        const memory = message.substring(14).trim();
+
+        if (memory && !memories.some(item => item.toLowerCase() === memory.toLowerCase())) {
+            memories.push(memory);
+            localStorage.setItem("zui-memories", JSON.stringify(memories));
+            return "Got it. I've saved that in local memory.";
+        }
+
+        return "I already have that in local memory.";
+    }
+
+    if (lowerMessage === "what do you remember?" || lowerMessage === "show my memories") {
+        if (memories.length === 0) {
+            return "My local memory is currently empty.";
+        }
+
+        return "Here's what I remember:\n\n" +
+            memories.map((item, index) => `${index + 1}. ${item}`).join("\n");
+    }
+
+    if (/^(hi|hello|hey|good morning|good afternoon|good evening)\b/.test(lowerMessage)) {
+        return "Hello, Boss. How can I help?";
+    }
+
+    return "I am running in local mode while the online backend reconnects. I can still save and show memories.";
+}
+
 async function sendMessage() {
 
     const message = input.value.trim();
@@ -69,7 +105,7 @@ async function sendMessage() {
 
         thinking.innerHTML = `
             <span class="sender">ZUI</span>
-            <p>Connection to ZUI's core was lost.</p>
+            <p>${createLocalReply(message)}</p>
         `;
     }
 
