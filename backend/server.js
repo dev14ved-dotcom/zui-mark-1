@@ -16,6 +16,8 @@ const PORT = process.env.PORT || 3000;
 
 const SERP_API_URL = "https://serpapi.com/search.json";
 const GNEWS_API_URL = "https://gnews.io/api/v4/search";
+const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-2.5-flash";
+const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
 
 // ==========================================
 // MEMORY
@@ -73,6 +75,14 @@ app.use(express.json());
 
 app.get("/", (req, res) => {
     res.send("ZUI MARK 1 is online!");
+});
+
+app.get("/health", (req, res) => {
+    res.json({
+        ok: true,
+        geminiConfigured: Boolean(process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY),
+        geminiModel: GEMINI_MODEL
+    });
 });
 
 // ==========================================
@@ -207,6 +217,64 @@ Link: ${article.url || "No link"}`)
         .join("\n");
 }
 
+async function askGoogle(message, memory, searchResults = null) {
+
+    const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
+
+    if (!apiKey) {
+        throw new Error("Gemini is not configured. Add GEMINI_API_KEY to the backend environment.");
+    }
+
+    const context = [
+        "You are ZUI MARK 1, a clear, friendly, direct assistant.",
+        `Stored memories:\n${memory}`,
+        searchResults ? `Web search results:\n${searchResults}` : "",
+        "Do not claim to have searched the web unless search results are provided."
+    ].filter(Boolean).join("\n\n");
+
+    try {
+        const response = await axios.post(
+            GEMINI_API_URL,
+            {
+                contents: [{
+                    parts: [{
+                        text: `${context}\n\nUser question: ${message}`
+                    }]
+                }],
+                generationConfig: {
+                    temperature: 0.7
+                }
+            },
+            {
+                headers: {
+                    "Content-Type": "application/json",
+                    "x-goog-api-key": apiKey
+                },
+                timeout: 30000
+            }
+        );
+
+        const answer = response.data?.candidates?.[0]?.content?.parts
+            ?.map(part => part.text)
+            .filter(Boolean)
+            .join("\n");
+
+        if (!answer) {
+            throw new Error("Gemini returned no text response.");
+        }
+
+        return answer;
+    } catch (error) {
+        console.error(
+            "GOOGLE API ERROR:",
+            error.response?.data?.error?.message || error.message
+        );
+        throw new Error(
+            error.response?.data?.error?.message || error.message
+        );
+    }
+}
+
 // ==========================================
 // LOCAL RESPONSE
 // ==========================================
@@ -221,10 +289,6 @@ function createLocalReply(message, memory, searchResults = null) {
 
     if (/^(hi|hello|hey|good morning|good afternoon|good evening)\b/.test(lowerMessage)) {
         return "Hello, Boss. How can I help?";
-    }
-
-    if (lowerMessage.includes("what is alloying") || lowerMessage === "define alloying") {
-        return "Alloying is the process of combining a metal with one or more other elements to improve its properties. For example, steel is an alloy of iron and carbon. Alloying can increase strength, hardness, corrosion resistance, or durability.";
     }
 
     if (lowerMessage.includes("what do you know about me") && memory !== "No stored memories.") {
@@ -397,22 +461,24 @@ app.post("/chat", async (req, res) => {
         }
 
         // ======================================
-        // LOCAL RESPONSE
+        // GOOGLE RESPONSE WITH LOCAL FALLBACK
         // ======================================
 
         console.log(
-            "ZUI: Creating local response..."
+            "ZUI: Creating response..."
         );
 
-        const answer =
-            createLocalReply(
-                message,
-                memoryText,
-                searchResults
-            );
+        let answer;
+
+        try {
+            answer = await askGoogle(message, memoryText, searchResults);
+        } catch (modelError) {
+            console.error("GEMINI FALLBACK:", modelError.message);
+            answer = createLocalReply(message, memoryText, searchResults);
+        }
 
         console.log(
-            "ZUI: Local response ready."
+            "ZUI: Response ready."
         );
 
         res.json({

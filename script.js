@@ -36,10 +36,6 @@ function createLocalReply(message) {
         return "Hello, Boss. How can I help?";
     }
 
-    if (lowerMessage.includes("what is alloying") || lowerMessage === "define alloying") {
-        return "Alloying is the process of combining a metal with one or more other elements to improve its properties. For example, steel is an alloy of iron and carbon. Alloying can increase strength, hardness, corrosion resistance, or durability.";
-    }
-
     return "I am running in local mode while the online backend reconnects. I can still save and show memories.";
 }
 
@@ -98,13 +94,9 @@ async function sendMessage() {
 
         const data = await response.json();
 
-        const reply = data.reply?.includes("running in local mode without a model API")
-            ? createLocalReply(message)
-            : data.reply;
-
         thinking.innerHTML = `
             <span class="sender">ZUI</span>
-            <p>${reply}</p>
+            <p>${data.reply}</p>
         `;
 
     } catch (error) {
