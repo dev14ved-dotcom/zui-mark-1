@@ -1003,6 +1003,23 @@ body.light-mode .logo-dots {
     opacity: 1;
 }
 
+/* The original interface uses muted white labels. Increase their contrast on white. */
+body.light-mode .mark,
+body.light-mode .system-status,
+body.light-mode .greeting,
+body.light-mode .sender,
+body.light-mode .connection,
+body.light-mode .controls span,
+body.light-mode .system-panel {
+    color: #233e5a;
+    opacity: 0.82;
+}
+
+body.light-mode .status {
+    color: #152238;
+    opacity: 1;
+}
+
 body.light-mode .core-ring {
     border-color: rgba(21,34,56,0.42);
 }
