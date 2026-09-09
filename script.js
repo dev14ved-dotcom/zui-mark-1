@@ -4,11 +4,18 @@ const chatBox = document.querySelector(".chat-box");
 const chatEndpoint = "https://zui-mark-1.onrender.com/chat";
 
 function formatChatText(text) {
-    return String(text)
+    const safeText = String(text)
+        // Some model/API responses escape Markdown characters. Convert those
+        // markers back before escaping HTML and applying the allowed formatting.
+        .replace(/\\\\([*_`])/g, "$1");
+
+    return safeText
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
         .replace(/>/g, "&gt;")
         .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+        .replace(/\*(.+?)\*/g, "<em>$1</em>")
+        .replace(/`(.+?)`/g, "<code>$1</code>")
         .replace(/\n/g, "<br>");
 }
 
@@ -42,10 +49,10 @@ function createLocalReply(message) {
     }
 
     if (/^(hi|hello|hey|good morning|good afternoon|good evening)\b/.test(lowerMessage)) {
-        return "Hello, Boss. How can I help?";
+        return "Hello, Boss! 😊 How can I help?";
     }
 
-    return "I am running in local mode while the online backend reconnects. I can still save and show memories.";
+    return "I am running in local mode while the online backend reconnects. 😊 I can still save and show memories.";
 }
 
 async function sendMessage() {
@@ -103,9 +110,13 @@ async function sendMessage() {
 
         const data = await response.json();
 
+        const reply = typeof data.reply === "string" && data.reply.trim()
+            ? data.reply
+            : "I could not generate a complete reply. Please try again. 🙏";
+
         thinking.innerHTML = `
             <span class="sender">ZUI</span>
-            <p>${formatChatText(data.reply)}</p>
+            <p>${formatChatText(reply)}</p>
         `;
 
     } catch (error) {
