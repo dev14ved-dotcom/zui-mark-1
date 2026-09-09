@@ -19,8 +19,8 @@ body {
 
 .theme-settings {
     margin: 18px auto 0;
-    max-width: 440px;
-    padding: 16px 18px;
+    max-width: 490px;
+    padding: 18px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -53,17 +53,48 @@ body {
 }
 
 .theme-option {
-    padding: 9px 12px;
+    min-width: 92px;
+    padding: 11px 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 7px;
     border: 1px solid rgba(255,255,255,0.18);
-    border-radius: 9px;
-    background: transparent;
+    border-radius: 11px;
+    background: rgba(255,255,255,0.04);
     color: inherit;
     cursor: pointer;
+    font-size: 9px;
+    font-weight: bold;
+    letter-spacing: 1.5px;
+    transition: transform 0.2s, background 0.2s, border-color 0.2s;
 }
 
 .theme-option.is-selected {
     border-color: rgba(255,255,255,0.8);
-    background: rgba(255,255,255,0.18);
+    background: rgba(255,255,255,0.16);
+    box-shadow: 0 0 18px rgba(255,255,255,0.08);
+}
+
+.theme-option:hover {
+    transform: translateY(-2px);
+    background: rgba(255,255,255,0.12);
+}
+
+.theme-swatch {
+    width: 28px;
+    height: 18px;
+    display: block;
+    border: 1px solid rgba(255,255,255,0.35);
+    border-radius: 6px;
+}
+
+.dark-swatch {
+    background: linear-gradient(135deg, #111b2c, #030508);
+}
+
+.light-swatch {
+    background: linear-gradient(135deg, #ffffff, #d9e7f6);
 }
 
 /* Light mode keeps the same layout while providing a bright, readable palette. */
@@ -132,6 +163,10 @@ html[data-theme="light"] .theme-option {
 
 html[data-theme="light"] .theme-option.is-selected {
     border-color: rgba(23,32,51,0.65);
+}
+
+html[data-theme="light"] .theme-option:hover {
+    background: rgba(49,102,153,0.1);
 }
 
 /* =========================
@@ -851,6 +886,19 @@ html[data-theme="light"] .theme-option.is-selected {
 ========================= */
 
 @media (max-width: 650px) {
+
+    .theme-settings {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .theme-options {
+        width: 100%;
+    }
+
+    .theme-option {
+        flex: 1;
+    }
 
     .top-bar {
 

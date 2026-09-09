@@ -136,13 +136,19 @@
             aria-label="Theme settings"
             hidden
         >
-            <div>
+            <div class="theme-settings-copy">
                 <span class="theme-settings-title">APPEARANCE</span>
-                <p>Choose how ZUI looks on this device.</p>
+                <p>Choose your interface mode.</p>
             </div>
             <div class="theme-options" role="group" aria-label="Color theme">
-                <button class="theme-option" type="button" data-theme="dark">Dark</button>
-                <button class="theme-option" type="button" data-theme="light">Light</button>
+                <button class="theme-option" type="button" data-theme="dark">
+                    <span class="theme-swatch dark-swatch" aria-hidden="true"></span>
+                    <span>DARK</span>
+                </button>
+                <button class="theme-option" type="button" data-theme="light">
+                    <span class="theme-swatch light-swatch" aria-hidden="true"></span>
+                    <span>LIGHT</span>
+                </button>
             </div>
         </section>
 
@@ -171,7 +177,7 @@
 
 
     <!-- JavaScript -->
-    <script src="script.js?v=3"></script>
+    <script src="script.js?v=4"></script>
 
 </body>
 </html>
