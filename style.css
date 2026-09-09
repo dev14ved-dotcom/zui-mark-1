@@ -970,3 +970,68 @@ html[data-theme="light"] .theme-option:hover {
     }
 
 }
+
+/* Final light-mode rules are deliberately last so the chosen theme always wins. */
+body.light-mode {
+    background: linear-gradient(145deg, #f8fbff 0%, #e7f0fa 52%, #d9e5f1 100%);
+    color: #152238;
+}
+
+body.light-mode .top-bar {
+    background: rgba(250,252,255,0.84);
+    border-bottom-color: rgba(21,34,56,0.16);
+}
+
+body.light-mode .logo,
+body.light-mode .mark,
+body.light-mode .status,
+body.light-mode .core-section,
+body.light-mode .message,
+body.light-mode .system-panel {
+    color: #152238;
+}
+
+body.light-mode .core-ring {
+    border-color: rgba(21,34,56,0.42);
+}
+
+body.light-mode .chat-container,
+body.light-mode .theme-settings {
+    background: rgba(255,255,255,0.78);
+    border-color: rgba(21,34,56,0.16);
+    box-shadow: 0 12px 38px rgba(37,72,110,0.13);
+}
+
+body.light-mode .chat-header,
+body.light-mode .input-section input,
+body.light-mode .voice-button,
+body.light-mode .send-button,
+body.light-mode .controls button {
+    border-color: rgba(21,34,56,0.2);
+}
+
+body.light-mode .input-section input {
+    background: rgba(255,255,255,0.9);
+    color: #152238;
+}
+
+body.light-mode .input-section input::placeholder {
+    color: rgba(21,34,56,0.48);
+}
+
+body.light-mode .voice-button,
+body.light-mode .send-button,
+body.light-mode .controls button,
+body.light-mode .theme-option {
+    background: rgba(255,255,255,0.62);
+    color: #152238;
+}
+
+body.light-mode .theme-option.is-selected,
+body.light-mode .voice-button:hover,
+body.light-mode .send-button:hover,
+body.light-mode .controls button:hover {
+    background: #d8e8f8;
+    border-color: #5d83aa;
+    box-shadow: 0 8px 20px rgba(51,95,140,0.16);
+}

@@ -10,7 +10,13 @@ function setTheme(theme) {
     const selectedTheme = theme === "light" ? "light" : "dark";
 
     document.documentElement.dataset.theme = selectedTheme;
-    localStorage.setItem("zui-theme", selectedTheme);
+    document.body.classList.toggle("light-mode", selectedTheme === "light");
+
+    try {
+        localStorage.setItem("zui-theme", selectedTheme);
+    } catch (error) {
+        console.warn("ZUI could not save the selected theme.", error);
+    }
 
     themeOptions.forEach((option) => {
         const isSelected = option.dataset.theme === selectedTheme;
@@ -19,7 +25,15 @@ function setTheme(theme) {
     });
 }
 
-setTheme(localStorage.getItem("zui-theme") || "dark");
+let savedTheme = "dark";
+
+try {
+    savedTheme = localStorage.getItem("zui-theme") || "dark";
+} catch (error) {
+    console.warn("ZUI could not read the saved theme.", error);
+}
+
+setTheme(savedTheme);
 
 settingsButton.setAttribute("aria-expanded", "false");
 settingsButton.setAttribute("aria-controls", "theme-settings");
@@ -31,7 +45,11 @@ settingsButton.addEventListener("click", () => {
 });
 
 themeOptions.forEach((option) => {
-    option.addEventListener("click", () => setTheme(option.dataset.theme));
+    option.addEventListener("click", () => {
+        setTheme(option.dataset.theme);
+        themeSettings.hidden = true;
+        settingsButton.setAttribute("aria-expanded", "false");
+    });
 });
 
 document.addEventListener("keydown", (event) => {
