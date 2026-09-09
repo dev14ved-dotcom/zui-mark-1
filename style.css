@@ -104,13 +104,14 @@ html[data-theme="light"] body {
 }
 
 html[data-theme="light"] .particles {
-    opacity: 0.28;
-    background-image: radial-gradient(circle, #52708d 1px, transparent 1px);
+    opacity: 0.65;
+    background-image: radial-gradient(circle, #5e85a9 1px, transparent 1px);
+    background-size: 32px 32px;
 }
 
 html[data-theme="light"] .top-bar {
-    border-color: rgba(23,32,51,0.14);
-    background: rgba(248,251,255,0.76);
+    border-color: rgba(255,255,255,0.14);
+    background: rgba(15,23,34,0.82);
 }
 
 html[data-theme="light"] .core-ring {
@@ -123,50 +124,71 @@ html[data-theme="light"] .core-section h1 {
 
 html[data-theme="light"] .chat-container,
 html[data-theme="light"] .theme-settings {
-    border-color: rgba(23,32,51,0.15);
-    background: rgba(255,255,255,0.7);
-    box-shadow: 0 0 40px rgba(41,72,104,0.12);
+    border-color: rgba(255,255,255,0.14);
+    background: rgba(17,27,38,0.8);
+    box-shadow: 0 0 40px rgba(5,9,14,0.28);
 }
 
 html[data-theme="light"] .chat-header {
-    border-color: rgba(23,32,51,0.12);
+    border-color: rgba(255,255,255,0.12);
 }
 
 html[data-theme="light"] .input-section input {
-    border-color: rgba(23,32,51,0.2);
-    background: rgba(255,255,255,0.8);
-    color: #172033;
+    border-color: rgba(255,255,255,0.16);
+    background: rgba(17,28,40,0.78);
+    color: #edf4ff;
 }
 
 html[data-theme="light"] .input-section input::placeholder {
-    color: rgba(23,32,51,0.48);
+    color: rgba(237,244,255,0.7);
 }
 
 html[data-theme="light"] .voice-button,
 html[data-theme="light"] .send-button,
 html[data-theme="light"] .controls button {
-    border-color: rgba(23,32,51,0.18);
-    background: rgba(255,255,255,0.55);
-    color: #172033;
+    border-color: rgba(255,255,255,0.16);
+    background: rgba(20,31,45,0.9);
+    color: #edf4ff;
 }
 
 html[data-theme="light"] .voice-button:hover,
 html[data-theme="light"] .send-button:hover,
 html[data-theme="light"] .controls button:hover,
 html[data-theme="light"] .theme-option.is-selected {
-    background: rgba(49,102,153,0.15);
+    background: rgba(80,118,162,0.3);
+}
+
+html[data-theme="light"] .logo,
+html[data-theme="light"] .mark,
+html[data-theme="light"] .status {
+    color: #edf4ff;
+}
+
+html[data-theme="light"] .logo-dots {
+    color: #b7d6ee;
+}
+
+html[data-theme="light"] .top-bar .mark,
+html[data-theme="light"] .top-bar .status,
+html[data-theme="light"] .chat-header span,
+html[data-theme="light"] .controls span,
+html[data-theme="light"] .theme-settings-title,
+html[data-theme="light"] .theme-option span {
+    color: #edf4ff;
 }
 
 html[data-theme="light"] .theme-option {
-    border-color: rgba(23,32,51,0.2);
+    border-color: rgba(255,255,255,0.16);
+    background: rgba(20,31,45,0.85);
+    color: #edf4ff;
 }
 
 html[data-theme="light"] .theme-option.is-selected {
-    border-color: rgba(23,32,51,0.65);
+    border-color: rgba(180,210,236,0.7);
 }
 
 html[data-theme="light"] .theme-option:hover {
-    background: rgba(49,102,153,0.1);
+    background: rgba(80,118,162,0.22);
 }
 
 /* =========================
@@ -978,13 +1000,22 @@ body.light-mode {
 }
 
 body.light-mode .top-bar {
-    background: rgba(250,252,255,0.84);
-    border-bottom-color: rgba(21,34,56,0.16);
+    background: rgba(15,23,34,0.82);
+    border-bottom-color: rgba(255,255,255,0.14);
+}
+
+body.light-mode .particles {
+    opacity: 0.65;
+    background-image: radial-gradient(circle, #5e85a9 1px, transparent 1px);
+    background-size: 32px 32px;
 }
 
 body.light-mode .logo,
 body.light-mode .mark,
-body.light-mode .status,
+body.light-mode .status {
+    color: #edf4ff;
+}
+
 body.light-mode .core-section,
 body.light-mode .message,
 body.light-mode .system-panel {
@@ -993,30 +1024,46 @@ body.light-mode .system-panel {
 
 /* Keep the ZUI mark high-contrast on the bright theme only. */
 body.light-mode .logo {
-    color: #0b1f36;
+    color: #edf4ff;
     opacity: 1;
-    text-shadow: 0 1px 0 rgba(255,255,255,0.9);
+    text-shadow: 0 1px 0 rgba(255,255,255,0.12);
 }
 
 body.light-mode .logo-dots {
-    color: #28577d;
+    color: #dfeeff;
     opacity: 1;
 }
 
-/* The original interface uses muted white labels. Increase their contrast on white. */
 body.light-mode .mark,
+body.light-mode .status {
+    color: #edf4ff;
+}
+
+/* Restore the readable dark text for the non-panel content on the bright background. */
 body.light-mode .system-status,
 body.light-mode .greeting,
 body.light-mode .sender,
-body.light-mode .connection,
-body.light-mode .controls span,
 body.light-mode .system-panel {
-    color: #233e5a;
-    opacity: 0.82;
+    color: #152238;
+    opacity: 1;
+}
+
+body.light-mode .mark,
+body.light-mode .connection,
+body.light-mode .controls span {
+    color: #edf4ff;
+    opacity: 1;
+}
+
+body.light-mode .chat-header span,
+body.light-mode .theme-settings-title,
+body.light-mode .theme-option span {
+    color: #edf4ff;
+    opacity: 1;
 }
 
 body.light-mode .status {
-    color: #152238;
+    color: #edf4ff;
     opacity: 1;
 }
 
@@ -1024,11 +1071,28 @@ body.light-mode .core-ring {
     border-color: rgba(21,34,56,0.42);
 }
 
+body.light-mode .core-dots {
+    color: #102847;
+    opacity: 1;
+    text-shadow:
+        0 0 5px rgba(255,255,255,0.9),
+        0 0 15px rgba(96,148,190,0.32);
+}
+
 body.light-mode .chat-container,
 body.light-mode .theme-settings {
-    background: rgba(255,255,255,0.78);
-    border-color: rgba(21,34,56,0.16);
-    box-shadow: 0 12px 38px rgba(37,72,110,0.13);
+    background: rgba(17,27,38,0.8);
+    border-color: rgba(255,255,255,0.14);
+    box-shadow: 0 12px 38px rgba(3,8,15,0.3);
+    color: #edf4ff;
+}
+
+body.light-mode .chat-box,
+body.light-mode .message,
+body.light-mode .sender,
+body.light-mode .message p,
+body.light-mode .connection {
+    color: #edf4ff !important;
 }
 
 body.light-mode .chat-header,
@@ -1036,31 +1100,31 @@ body.light-mode .input-section input,
 body.light-mode .voice-button,
 body.light-mode .send-button,
 body.light-mode .controls button {
-    border-color: rgba(21,34,56,0.2);
+    border-color: rgba(255,255,255,0.16);
 }
 
 body.light-mode .input-section input {
-    background: rgba(255,255,255,0.9);
-    color: #152238;
+    background: rgba(17,28,40,0.78);
+    color: #edf4ff;
 }
 
 body.light-mode .input-section input::placeholder {
-    color: rgba(21,34,56,0.48);
+    color: rgba(237,244,255,0.7);
 }
 
 body.light-mode .voice-button,
 body.light-mode .send-button,
 body.light-mode .controls button,
 body.light-mode .theme-option {
-    background: rgba(255,255,255,0.62);
-    color: #152238;
+    background: rgba(20,31,45,0.9);
+    color: #edf4ff;
 }
 
 body.light-mode .theme-option.is-selected,
 body.light-mode .voice-button:hover,
 body.light-mode .send-button:hover,
 body.light-mode .controls button:hover {
-    background: #d8e8f8;
-    border-color: #5d83aa;
-    box-shadow: 0 8px 20px rgba(51,95,140,0.16);
+    background: rgba(80,118,162,0.3);
+    border-color: rgba(180,210,236,0.72);
+    box-shadow: 0 8px 20px rgba(12,22,35,0.24);
 }
