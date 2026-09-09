@@ -2,6 +2,45 @@ const input = document.querySelector(".input-section input");
 const button = document.querySelector(".send-button");
 const chatBox = document.querySelector(".chat-box");
 const chatEndpoint = "https://zui-mark-1.onrender.com/chat";
+const settingsButton = document.querySelector(".controls button:last-child");
+const themeSettings = document.querySelector(".theme-settings");
+const themeOptions = document.querySelectorAll(".theme-option");
+
+function setTheme(theme) {
+    const selectedTheme = theme === "light" ? "light" : "dark";
+
+    document.documentElement.dataset.theme = selectedTheme;
+    localStorage.setItem("zui-theme", selectedTheme);
+
+    themeOptions.forEach((option) => {
+        const isSelected = option.dataset.theme === selectedTheme;
+        option.classList.toggle("is-selected", isSelected);
+        option.setAttribute("aria-pressed", String(isSelected));
+    });
+}
+
+setTheme(localStorage.getItem("zui-theme") || "dark");
+
+settingsButton.setAttribute("aria-expanded", "false");
+settingsButton.setAttribute("aria-controls", "theme-settings");
+
+settingsButton.addEventListener("click", () => {
+    const isOpen = !themeSettings.hidden;
+    themeSettings.hidden = isOpen;
+    settingsButton.setAttribute("aria-expanded", String(!isOpen));
+});
+
+themeOptions.forEach((option) => {
+    option.addEventListener("click", () => setTheme(option.dataset.theme));
+});
+
+document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !themeSettings.hidden) {
+        themeSettings.hidden = true;
+        settingsButton.setAttribute("aria-expanded", "false");
+        settingsButton.focus();
+    }
+});
 
 function formatChatText(text) {
     const safeText = String(text)

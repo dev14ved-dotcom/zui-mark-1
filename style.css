@@ -14,6 +14,127 @@ body {
 }
 
 /* =========================
+   THEME SETTINGS
+========================= */
+
+.theme-settings {
+    margin: 18px auto 0;
+    max-width: 440px;
+    padding: 16px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 14px;
+    background: rgba(10,13,20,0.72);
+    backdrop-filter: blur(18px);
+}
+
+.theme-settings[hidden] {
+    display: none;
+}
+
+.theme-settings-title {
+    font-size: 10px;
+    letter-spacing: 2px;
+    opacity: 0.65;
+}
+
+.theme-settings p {
+    margin-top: 5px;
+    font-size: 13px;
+    opacity: 0.8;
+}
+
+.theme-options {
+    display: flex;
+    gap: 7px;
+}
+
+.theme-option {
+    padding: 9px 12px;
+    border: 1px solid rgba(255,255,255,0.18);
+    border-radius: 9px;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+}
+
+.theme-option.is-selected {
+    border-color: rgba(255,255,255,0.8);
+    background: rgba(255,255,255,0.18);
+}
+
+/* Light mode keeps the same layout while providing a bright, readable palette. */
+html[data-theme="light"] body {
+    background: radial-gradient(circle at center, #f7fbff 0%, #e8eef7 48%, #dbe5f0 100%);
+    color: #172033;
+}
+
+html[data-theme="light"] .particles {
+    opacity: 0.28;
+    background-image: radial-gradient(circle, #52708d 1px, transparent 1px);
+}
+
+html[data-theme="light"] .top-bar {
+    border-color: rgba(23,32,51,0.14);
+    background: rgba(248,251,255,0.76);
+}
+
+html[data-theme="light"] .core-ring {
+    border-color: rgba(23,32,51,0.35);
+}
+
+html[data-theme="light"] .core-section h1 {
+    text-shadow: 0 0 15px rgba(31,62,92,0.18);
+}
+
+html[data-theme="light"] .chat-container,
+html[data-theme="light"] .theme-settings {
+    border-color: rgba(23,32,51,0.15);
+    background: rgba(255,255,255,0.7);
+    box-shadow: 0 0 40px rgba(41,72,104,0.12);
+}
+
+html[data-theme="light"] .chat-header {
+    border-color: rgba(23,32,51,0.12);
+}
+
+html[data-theme="light"] .input-section input {
+    border-color: rgba(23,32,51,0.2);
+    background: rgba(255,255,255,0.8);
+    color: #172033;
+}
+
+html[data-theme="light"] .input-section input::placeholder {
+    color: rgba(23,32,51,0.48);
+}
+
+html[data-theme="light"] .voice-button,
+html[data-theme="light"] .send-button,
+html[data-theme="light"] .controls button {
+    border-color: rgba(23,32,51,0.18);
+    background: rgba(255,255,255,0.55);
+    color: #172033;
+}
+
+html[data-theme="light"] .voice-button:hover,
+html[data-theme="light"] .send-button:hover,
+html[data-theme="light"] .controls button:hover,
+html[data-theme="light"] .theme-option.is-selected {
+    background: rgba(49,102,153,0.15);
+}
+
+html[data-theme="light"] .theme-option {
+    border-color: rgba(23,32,51,0.2);
+}
+
+html[data-theme="light"] .theme-option.is-selected {
+    border-color: rgba(23,32,51,0.65);
+}
+
+/* =========================
    BACKGROUND PARTICLES
 ========================= */
 
