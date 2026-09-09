@@ -177,6 +177,16 @@ html[data-theme="light"] .theme-option span {
     color: #edf4ff;
 }
 
+html[data-theme="light"] .logo,
+html[data-theme="light"] .mark,
+html[data-theme="light"] .status {
+    color: #102847;
+}
+
+html[data-theme="light"] .logo-dots {
+    color: #2c5d86;
+}
+
 html[data-theme="light"] .theme-option {
     border-color: rgba(255,255,255,0.16);
     background: rgba(20,31,45,0.85);
@@ -225,6 +235,9 @@ html[data-theme="light"] .theme-option:hover {
 ========================= */
 
 .top-bar {
+    position: sticky;
+    top: 0;
+    z-index: 20;
     height: 70px;
     padding: 0 35px;
 
@@ -237,6 +250,49 @@ html[data-theme="light"] .theme-option:hover {
     background: rgba(5,7,12,0.7);
 
     backdrop-filter: blur(15px);
+}
+
+.top-tabs {
+    position: sticky;
+    top: 70px;
+    z-index: 18;
+    margin: 10px auto 0;
+    max-width: 520px;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 14px;
+    background: rgba(10,13,20,0.72);
+    backdrop-filter: blur(18px);
+    box-shadow: 0 12px 28px rgba(0,0,0,0.18);
+}
+
+.tab-item {
+    flex: 1;
+    min-width: 0;
+    padding: 10px 12px;
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 10px;
+    background: rgba(255,255,255,0.04);
+    color: inherit;
+    cursor: pointer;
+    font-size: 9px;
+    font-weight: bold;
+    letter-spacing: 1.8px;
+    transition: background 0.2s, border-color 0.2s, transform 0.2s;
+}
+
+.tab-item.is-active {
+    border-color: rgba(255,255,255,0.5);
+    background: rgba(255,255,255,0.14);
+}
+
+.tab-item:hover {
+    transform: translateY(-1px);
+    background: rgba(255,255,255,0.1);
 }
 
 .logo {
@@ -1127,4 +1183,149 @@ body.light-mode .controls button:hover {
     background: rgba(80,118,162,0.3);
     border-color: rgba(180,210,236,0.72);
     box-shadow: 0 8px 20px rgba(12,22,35,0.24);
+}
+
+/* =========================
+   CONVERSATION SIDEBAR
+========================= */
+
+.sidebar {
+    position: fixed;
+    top: 70px;
+    left: 0;
+    width: 250px;
+    max-height: calc(100vh - 70px);
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 0 0 14px 0;
+    background: rgba(10,13,20,0.82);
+    backdrop-filter: blur(18px);
+    box-shadow: 0 12px 32px rgba(0,0,0,0.22);
+    overflow-y: auto;
+    z-index: 5;
+}
+
+.new-chat-button,
+.conversation-item,
+.conversation-delete,
+.sidebar-toggle {
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 10px;
+    background: rgba(255,255,255,0.05);
+    color: inherit;
+    cursor: pointer;
+    font: inherit;
+    transition: background 0.2s, border-color 0.2s, transform 0.2s;
+}
+
+.new-chat-button {
+    width: 100%;
+    padding: 12px;
+    font-size: 10px;
+    font-weight: bold;
+    letter-spacing: 1.8px;
+}
+
+.conversation-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.conversation-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.conversation-item {
+    flex: 1;
+    width: 100%;
+    padding: 10px 11px;
+    overflow: hidden;
+    text-align: left;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 12px;
+}
+
+.conversation-delete {
+    padding: 8px 9px;
+    font-size: 9px;
+    font-weight: bold;
+    letter-spacing: 1.2px;
+}
+
+.new-chat-button:hover,
+.conversation-item:hover,
+.conversation-item.is-active,
+.conversation-delete:hover {
+    border-color: rgba(255,255,255,0.38);
+    background: rgba(255,255,255,0.13);
+}
+
+.new-chat-button:hover {
+    transform: translateY(-1px);
+}
+
+.sidebar-toggle {
+    display: none;
+}
+
+body.light-mode .sidebar {
+    border-color: rgba(21,34,56,0.16);
+    background: rgba(255,255,255,0.88);
+    box-shadow: 0 12px 32px rgba(37,72,110,0.14);
+}
+
+body.light-mode .new-chat-button,
+body.light-mode .conversation-item,
+body.light-mode .conversation-delete,
+body.light-mode .sidebar-toggle {
+    border-color: rgba(21,34,56,0.2);
+    background: rgba(255,255,255,0.62);
+    color: #152238;
+}
+
+body.light-mode .new-chat-button:hover,
+body.light-mode .conversation-item:hover,
+body.light-mode .conversation-item.is-active,
+body.light-mode .conversation-delete:hover {
+    border-color: #5d83aa;
+    background: #d8e8f8;
+}
+
+@media (max-width: 900px) {
+    .sidebar {
+        top: 70px;
+        left: 0;
+        width: min(250px, 84vw);
+        max-height: calc(100vh - 70px);
+        border-radius: 0 14px 14px 0;
+        transform: translateX(-105%);
+        transition: transform 0.25s ease;
+    }
+
+    body.sidebar-open .sidebar {
+        transform: translateX(0);
+    }
+
+    .sidebar-toggle {
+        position: fixed;
+        top: 17px;
+        left: 15px;
+        z-index: 6;
+        display: block;
+        padding: 8px 10px;
+        font-size: 9px;
+        font-weight: bold;
+        letter-spacing: 1px;
+    }
+
+    .top-bar {
+        padding-left: 82px;
+    }
 }

@@ -5,6 +5,171 @@ const chatEndpoint = "https://zui-mark-1.onrender.com/chat";
 const settingsButton = document.querySelector(".controls button:last-child");
 const themeSettings = document.querySelector(".theme-settings");
 const themeOptions = document.querySelectorAll(".theme-option");
+const sidebar = document.querySelector(".sidebar");
+const sidebarToggle = document.querySelector(".sidebar-toggle");
+const newChatButton = document.querySelector(".new-chat-button");
+const conversationList = document.querySelector(".conversation-list");
+const CONVERSATIONS_KEY = "zui-conversations";
+const ACTIVE_CONVERSATION_KEY = "zui-active-conversation";
+const welcomeMessage = "Hello. ZUI MARK 1 is online.";
+
+function createConversation() {
+    return {
+        id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+        title: "New conversation",
+        messages: [{ role: "zui", text: welcomeMessage }]
+    };
+}
+
+function loadConversations() {
+    try {
+        const saved = JSON.parse(localStorage.getItem(CONVERSATIONS_KEY) || "[]");
+        return Array.isArray(saved) ? saved.filter(conversation =>
+            conversation && typeof conversation.id === "string" &&
+            Array.isArray(conversation.messages)
+        ) : [];
+    } catch (error) {
+        console.warn("ZUI could not load saved conversations.", error);
+        return [];
+    }
+}
+
+function saveConversations() {
+    try {
+        localStorage.setItem(CONVERSATIONS_KEY, JSON.stringify(conversations));
+        localStorage.setItem(ACTIVE_CONVERSATION_KEY, activeConversationId);
+    } catch (error) {
+        console.warn("ZUI could not save conversations.", error);
+    }
+}
+
+let conversations = loadConversations();
+let activeConversationId = localStorage.getItem(ACTIVE_CONVERSATION_KEY);
+
+if (!conversations.length) {
+    conversations = [createConversation()];
+}
+
+if (!conversations.some(conversation => conversation.id === activeConversationId)) {
+    activeConversationId = conversations[0].id;
+}
+
+saveConversations();
+
+function getActiveConversation() {
+    return conversations.find(conversation => conversation.id === activeConversationId);
+}
+
+function addMessage(role, text) {
+    const message = document.createElement("div");
+    message.className = `message ${role === "user" ? "user-message" : "zui-message"}`;
+    message.innerHTML = `
+        <span class="sender">${role === "user" ? "YOU" : "ZUI"}</span>
+        <p>${formatChatText(text)}</p>
+    `;
+    chatBox.appendChild(message);
+    return message;
+}
+
+function renderActiveConversation() {
+    const conversation = getActiveConversation();
+    chatBox.innerHTML = "";
+    conversation.messages.forEach(message => addMessage(message.role, message.text));
+    chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+function renderConversationList() {
+    conversationList.innerHTML = "";
+
+    conversations.forEach(conversation => {
+        const row = document.createElement("div");
+        row.className = "conversation-row";
+
+        const item = document.createElement("button");
+        item.type = "button";
+        item.className = "conversation-item";
+        item.textContent = conversation.title;
+        item.classList.toggle("is-active", conversation.id === activeConversationId);
+        item.addEventListener("click", () => {
+            activeConversationId = conversation.id;
+            saveConversations();
+            renderActiveConversation();
+            renderConversationList();
+            document.body.classList.remove("sidebar-open");
+            sidebarToggle.setAttribute("aria-expanded", "false");
+        });
+
+        const deleteButton = document.createElement("button");
+        deleteButton.type = "button";
+        deleteButton.className = "conversation-delete";
+        deleteButton.textContent = "DELETE";
+        deleteButton.setAttribute("aria-label", `Delete ${conversation.title}`);
+        deleteButton.addEventListener("click", (event) => {
+            event.stopPropagation();
+
+            const indexToRemove = conversations.findIndex(item => item.id === conversation.id);
+            if (indexToRemove === -1) {
+                return;
+            }
+
+            const wasActive = conversation.id === activeConversationId;
+
+            conversations.splice(indexToRemove, 1);
+
+            if (!conversations.length) {
+                const freshConversation = createConversation();
+                conversations.push(freshConversation);
+                activeConversationId = freshConversation.id;
+            } else if (wasActive) {
+                const nextIndex = Math.min(indexToRemove, conversations.length - 1);
+                activeConversationId = conversations[nextIndex].id;
+            }
+
+            saveConversations();
+            renderActiveConversation();
+            renderConversationList();
+        });
+
+        row.appendChild(item);
+        row.appendChild(deleteButton);
+        conversationList.appendChild(row);
+    });
+}
+
+function saveMessage(role, text, conversationId = activeConversationId) {
+    const conversation = conversations.find(item => item.id === conversationId);
+
+    if (!conversation) {
+        return;
+    }
+
+    conversation.messages.push({ role, text });
+
+    if (role === "user" && conversation.title === "New conversation") {
+        const normalizedTitle = text.replace(/\s+/g, " ").trim();
+        conversation.title = normalizedTitle.length > 42
+            ? `${normalizedTitle.slice(0, 42)}...`
+            : normalizedTitle;
+    }
+
+    saveConversations();
+    renderConversationList();
+}
+
+newChatButton.addEventListener("click", () => {
+    const conversation = createConversation();
+    conversations.unshift(conversation);
+    activeConversationId = conversation.id;
+    saveConversations();
+    renderActiveConversation();
+    renderConversationList();
+    input.focus();
+});
+
+sidebarToggle.addEventListener("click", () => {
+    const isOpen = document.body.classList.toggle("sidebar-open");
+    sidebarToggle.setAttribute("aria-expanded", String(isOpen));
+});
 
 function setTheme(theme) {
     const selectedTheme = theme === "light" ? "light" : "dark";
@@ -58,6 +223,12 @@ document.addEventListener("keydown", (event) => {
         settingsButton.setAttribute("aria-expanded", "false");
         settingsButton.focus();
     }
+
+    if (event.key === "Escape" && document.body.classList.contains("sidebar-open")) {
+        document.body.classList.remove("sidebar-open");
+        sidebarToggle.setAttribute("aria-expanded", "false");
+        sidebarToggle.focus();
+    }
 });
 
 function formatChatText(text) {
@@ -75,6 +246,9 @@ function formatChatText(text) {
         .replace(/`(.+?)`/g, "<code>$1</code>")
         .replace(/\n/g, "<br>");
 }
+
+renderActiveConversation();
+renderConversationList();
 
 function createLocalReply(message) {
 
@@ -120,27 +294,16 @@ async function sendMessage() {
         return;
     }
 
+    const conversationId = activeConversationId;
+
     // Show user's message
-    chatBox.innerHTML += `
-        <div class="message user-message">
-            <span class="sender">YOU</span>
-            <p>${formatChatText(message)}</p>
-        </div>
-    `;
+    addMessage("user", message);
+    saveMessage("user", message, conversationId);
 
     input.value = "";
 
     // Show thinking message
-    const thinking = document.createElement("div");
-
-    thinking.className = "message zui-message";
-
-    thinking.innerHTML = `
-        <span class="sender">ZUI</span>
-        <p>ZUI is thinking...</p>
-    `;
-
-    chatBox.appendChild(thinking);
+    const thinking = addMessage("zui", "ZUI is thinking...");
 
     chatBox.scrollTop = chatBox.scrollHeight;
 
@@ -175,15 +338,19 @@ async function sendMessage() {
             <span class="sender">ZUI</span>
             <p>${formatChatText(reply)}</p>
         `;
+        saveMessage("zui", reply, conversationId);
 
     } catch (error) {
 
         console.error("ZUI CONNECTION ERROR:", error);
 
+        const fallbackReply = createLocalReply(message);
+
         thinking.innerHTML = `
             <span class="sender">ZUI</span>
-            <p>${formatChatText(createLocalReply(message))}</p>
+            <p>${formatChatText(fallbackReply)}</p>
         `;
+        saveMessage("zui", fallbackReply, conversationId);
     }
 
     chatBox.scrollTop = chatBox.scrollHeight;
