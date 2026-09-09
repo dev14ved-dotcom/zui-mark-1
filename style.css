@@ -991,6 +991,18 @@ body.light-mode .system-panel {
     color: #152238;
 }
 
+/* Keep the ZUI mark high-contrast on the bright theme only. */
+body.light-mode .logo {
+    color: #0b1f36;
+    opacity: 1;
+    text-shadow: 0 1px 0 rgba(255,255,255,0.9);
+}
+
+body.light-mode .logo-dots {
+    color: #28577d;
+    opacity: 1;
+}
+
 body.light-mode .core-ring {
     border-color: rgba(21,34,56,0.42);
 }
